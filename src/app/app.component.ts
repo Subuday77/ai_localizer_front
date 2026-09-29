@@ -5,6 +5,7 @@ import { finalize } from 'rxjs';
 import Swal from 'sweetalert2';
 import { ENGLISH_UI, FALLBACK_LANGUAGES, UiStringKey } from './constants/ui-strings';
 import { LanguageOption, TranslateRequest } from './models/localization.models';
+import { AnalyticsApiService } from './services/analytics-api.service';
 import { LocalizationApiService } from './services/localization-api.service';
 
 @Component({
@@ -16,6 +17,7 @@ import { LocalizationApiService } from './services/localization-api.service';
 })
 export class AppComponent implements OnInit {
   private readonly localizationApi = inject(LocalizationApiService);
+  private readonly analyticsApi = inject(AnalyticsApiService);
   private readonly spinner = inject(NgxSpinnerService);
   private readonly changeDetector = inject(ChangeDetectorRef);
 
@@ -38,11 +40,13 @@ export class AppComponent implements OnInit {
   dislikeY = 0;
 
   /**
-   * Load the server-owned language list while keeping a local fallback available.
+   * Record the page view and load the server-owned language list.
    *
    * @returns Nothing.
    */
   ngOnInit(): void {
+    this.trackPageView();
+
     this.localizationApi.getLanguages().subscribe({
       next: (languages) => {
         this.languageOptions = this.toLanguageOptions(languages);
@@ -250,6 +254,38 @@ export class AppComponent implements OnInit {
     this.dislikeX = nextX;
     this.dislikeY = nextY;
     this.dislikeMoved = true;
+  }
+
+  /**
+   * Record the current page view without interrupting the user if analytics fails.
+   *
+   * @returns Nothing.
+   */
+  private trackPageView(): void {
+    this.analyticsApi
+      .trackPageView(window.location.pathname || '/', this.getReferrerOrigin())
+      .subscribe({
+        error: () => {
+          // Analytics must never affect the application experience.
+        }
+      });
+  }
+
+  /**
+   * Reduce the browser referrer to its origin before sending it to the backend.
+   *
+   * @returns Referrer origin, or null for direct/invalid referrers.
+   */
+  private getReferrerOrigin(): string | null {
+    if (!document.referrer) {
+      return null;
+    }
+
+    try {
+      return new URL(document.referrer).origin;
+    } catch {
+      return null;
+    }
   }
 
   /**
