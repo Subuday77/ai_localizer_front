@@ -1,0 +1,108 @@
+<main class="page-shell" [attr.dir]="pageDirection">
+  <div class="background-orb orb-one"></div>
+  <div class="background-orb orb-two"></div>
+
+  <section class="localizer-card" aria-labelledby="welcome-title">
+    <div class="brand-row">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" role="img">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M3.5 12h17M12 3c2.5 2.5 3.7 5.5 3.7 9S14.5 18.5 12 21M12 3C9.5 5.5 8.3 8.5 8.3 12S9.5 18.5 12 21"></path>
+        </svg>
+      </div>
+      <span class="brand-name">{{ t('brand') }}</span>
+      <span class="ai-pill">AI</span>
+    </div>
+
+    <header class="hero-copy">
+      <p class="eyebrow">{{ t('welcome') }}</p>
+      <h1 id="welcome-title">{{ t('hero_title') }}</h1>
+      <p class="explanation">{{ t('explanation') }}</p>
+    </header>
+
+    <div class="form-stack">
+      <div class="field-group">
+        <label for="language-select">{{ t('language_label') }}</label>
+        <div class="select-shell">
+          <span class="globe-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="9"></circle>
+              <path d="M3.5 12h17M12 3c2.6 2.4 4 5.4 4 9s-1.4 6.6-4 9M12 3c-2.6 2.4-4 5.4-4 9s1.4 6.6 4 9"></path>
+            </svg>
+          </span>
+          <select id="language-select" [(ngModel)]="selectedLanguageCode" [disabled]="isLoading">
+            <option value="">{{ t('language_placeholder') }}</option>
+            @for (language of languageOptions; track language.code) {
+              <option [value]="language.code">{{ language.name }}</option>
+            }
+          </select>
+          <span class="select-chevron" aria-hidden="true">⌄</span>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label for="custom-language" class="custom-label">{{ t('custom_language_label') }}</label>
+        <input
+          id="custom-language"
+          type="text"
+          [(ngModel)]="customLanguageName"
+          [placeholder]="t('custom_language_placeholder')"
+          [disabled]="isLoading"
+          autocomplete="off"
+          maxlength="100"
+        >
+      </div>
+
+      <button class="localize-button" type="button" (click)="localize()" [disabled]="isLoading">
+        <span>{{ t('localize_button') }}</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 12h14M13 6l6 6-6 6"></path>
+        </svg>
+      </button>
+    </div>
+
+    @if (isLocalized) {
+      <section class="feedback-section" aria-labelledby="feedback-title">
+        <div class="divider"></div>
+        <h2 id="feedback-title">{{ t('feedback_title') }}</h2>
+
+        <div class="feedback-area" #feedbackArea>
+          <div class="positive-actions" #positiveActions>
+            <button type="button" class="feedback-button like" (click)="like()">
+              <span aria-hidden="true">👍</span>
+              {{ t('like_button') }}
+            </button>
+            <button type="button" class="feedback-button love" (click)="love()">
+              <span aria-hidden="true">💚</span>
+              {{ t('love_button') }}
+            </button>
+          </div>
+
+          <button
+            #dislikeButton
+            type="button"
+            class="feedback-button dislike"
+            [class.moved]="dislikeMoved"
+            [style.left.px]="dislikeMoved ? dislikeX : null"
+            [style.top.px]="dislikeMoved ? dislikeY : null"
+            (pointerenter)="moveDislikeButton($event)"
+            (click)="moveDislikeButton($event)"
+          >
+            <span aria-hidden="true">👎</span>
+            {{ t('dislike_button') }}
+          </button>
+        </div>
+      </section>
+    }
+  </section>
+</main>
+
+<ngx-spinner
+  bdColor="rgba(5, 18, 13, 0.82)"
+  size="medium"
+  color="#8ff0b8"
+  type="ball-triangle-path"
+  [fullScreen]="true"
+>
+  <p class="spinner-copy">{{ t('spinner_text') }}</p>
+</ngx-spinner>
