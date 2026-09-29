@@ -222,7 +222,7 @@ export class AppComponent implements OnInit {
     let nextX = edgePadding;
     let nextY = maxY;
 
-    for (let attempt = 0; attemp < 80; attempt += 1) {
+    for (let attempt = 0; attempt < 80; attempt += 1) {
       const candidateX = edgePadding + Math.random() * Math.max(0, maxX - edgePadding);
       const candidateY = edgePadding + Math.random() * Math.max(0, maxY - edgePadding);
       const candidateRight = candidateX + button.offsetWidth;
