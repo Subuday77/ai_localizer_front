@@ -34,6 +34,8 @@ export class AppComponent implements OnInit {
   selectedLanguageCode = '';
   customLanguageName = '';
   isLocalized = false;
+  // Language of the page currently shown, NOT the selected translation target.
+  currentUiLanguageCode = 'en';
   isLoading = false;
   pageDirection: 'ltr' | 'rtl' = 'ltr';
 
@@ -122,6 +124,7 @@ export class AppComponent implements OnInit {
             this.strings = { ...ENGLISH_UI };
             this.pageDirection = 'ltr';
             this.isLocalized = false;
+            this.currentUiLanguageCode = 'en';
             this.dislikeMoved = false;
 
             void Swal.fire({
@@ -137,6 +140,7 @@ export class AppComponent implements OnInit {
             this.strings = { ...ENGLISH_UI };
             this.pageDirection = 'ltr';
             this.isLocalized = false;
+            this.currentUiLanguageCode = 'en';
             void Swal.fire({
               title: this.t('localization_error_title'),
               text: response.error || this.t('localization_error_text'),
@@ -152,6 +156,9 @@ export class AppComponent implements OnInit {
           };
           this.pageDirection = this.detectDirection(this.strings);
           this.isLocalized = true;
+          // A manual language name takes precedence in the API. For languages
+          // without a known message translation, use a safe English fallback.
+          this.currentUiLanguageCode = customLanguage ? 'en' : (request.language_code ?? 'en');
           this.dislikeMoved = false;
 
           // Schedule a normal Angular refresh instead of forcing a nested
@@ -160,7 +167,7 @@ export class AppComponent implements OnInit {
         },
         error: (error: unknown) => {
           if (error instanceof HttpErrorResponse && error.status === 429) {
-            const message = DEMO_LIMIT_MESSAGES[this.selectedLanguageCode] ?? DEMO_LIMIT_MESSAGES['en'];
+            const message = DEMO_LIMIT_MESSAGES[this.currentUiLanguageCode] ?? DEMO_LIMIT_MESSAGES['en'];
             void Swal.fire({
               title: message.title,
               text: message.text,
