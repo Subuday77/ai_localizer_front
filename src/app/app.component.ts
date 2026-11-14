@@ -1,9 +1,11 @@
 import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { finalize } from 'rxjs';
 import Swal from 'sweetalert2';
 import { ENGLISH_UI, FALLBACK_LANGUAGES, UiStringKey } from './constants/ui-strings';
+import { DEMO_LIMIT_MESSAGES } from './constants/demo-errors';
 import { LanguageOption, TranslateRequest } from './models/localization.models';
 import { AnalyticsApiService } from './services/analytics-api.service';
 import { LocalizationApiService } from './services/localization-api.service';
@@ -156,7 +158,18 @@ export class AppComponent implements OnInit {
           // change-detection pass while the current pass may still be running.
           this.changeDetector.markForCheck();
         },
-        error: () => {
+        error: (error: unknown) => {
+          if (error instanceof HttpErrorResponse && error.status === 429) {
+            const message = DEMO_LIMIT_MESSAGES[this.selectedLanguageCode] ?? DEMO_LIMIT_MESSAGES['en'];
+            void Swal.fire({
+              title: message.title,
+              text: message.text,
+              icon: 'info',
+              confirmButtonColor: '#168a50'
+            });
+            return;
+          }
+
           void Swal.fire({
             title: this.t('server_error_title'),
             text: this.t('server_error_text'),
